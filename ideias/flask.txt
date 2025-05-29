@@ -1,0 +1,55 @@
+from flask import Flask, request, jsonify
+import mysql.connector
+
+app = Flask(__name__)
+
+def conectar_banco():
+    return mysql.connector.connect(
+        host="ENDERECO_DO_SEU_RDS",
+        user="usuario_reup",
+        password="sua_senha",
+        database="reup_db"
+    )
+
+@app.route('/inserir_produto', methods=['POST'])
+def inserir_produto():
+    dados = request.json
+    try:
+        conexao = conectar_banco()
+        cursor = conexao.cursor()
+        sql = "INSERT INTO produtos (id, modelo, tamanho, marca) VALUES (%s, %s, %s, %s)"
+        valores = (dados['id'], dados['modelo'], dados['tamanho'], dados['marca'])
+        cursor.execute(sql, valores)
+        conexao.commit()
+        return jsonify({"msg": "Produto inserido com sucesso!"}), 201
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 400
+    finally:
+        cursor.close()
+        conexao.close()
+
+@app.route('/buscar_produto/<int:id>', methods=['GET'])
+def buscar_produto(id):
+    try:
+        conexao = conectar_banco()
+        cursor = conexao.cursor()
+        cursor.execute("SELECT * FROM produtos WHERE id = %s", (id,))
+        resultado = cursor.fetchone()
+        if resultado:
+            produto = {
+                "id": resultado[0],
+                "modelo": resultado[1],
+                "tamanho": resultado[2],
+                "marca": resultado[3]
+            }
+            return jsonify(produto)
+        else:
+            return jsonify({"msg": "Produto não encontrado"}), 404
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 400
+    finally:
+        cursor.close()
+        conexao.close()
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
