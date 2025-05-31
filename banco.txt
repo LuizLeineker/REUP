@@ -10,9 +10,9 @@ CREATE TABLE produtos (
 );
 
 
-CREATE USER 'usuario_reup'@'localhost' IDENTIFIED BY 'sua_senha';
+CREATE USER 'user_reup'@'localhost' IDENTIFIED BY 'senha';
 
-GRANT ALL PRIVILEGES ON reup_db.* TO 'usuario_reup'@'localhost';
+GRANT ALL PRIVILEGES ON reup_db.* TO 'user_reup'@'localhost';
 
 FLUSH PRIVILEGES;
 
